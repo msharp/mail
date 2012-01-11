@@ -71,7 +71,11 @@ module Mail
         
         if block_given?
           mails.each do |mail|
-            new_message = Mail.new(mail.pop)
+            begin
+              new_message = Mail.new(mail.pop)
+            rescue
+              warn "Could not parse message content, skipping a message" 
+            end             
             new_message.mark_for_delete = true if options[:delete_after_find]
             yield new_message
             mail.delete if options[:delete_after_find] && new_message.is_marked_for_delete? # Delete if still marked for delete
@@ -79,7 +83,11 @@ module Mail
         else
           emails = []
           mails.each do |mail|
-            emails << Mail.new(mail.pop)
+            begin
+              emails << Mail.new(mail.pop)
+            rescue
+              warn "Could not parse message content, skipping a message" 
+            end
             mail.delete if options[:delete_after_find]
           end
           emails.size == 1 && options[:count] == 1 ? emails.first : emails
